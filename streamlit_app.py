@@ -18,22 +18,22 @@ alpha = 0.3
 beta = 0.3
 
 oggi = datetime.now().date()
-fine_periodo = oggi + timedelta(days=num_giorni)      # quanti giorni prima riesco a fare prenotazione   
+fine_periodo = oggi + timedelta(days=num_giorni)    # ultima data inclusa
 giorni_prenotazioni = pd.date_range(start=oggi, end=fine_periodo - timedelta(days=1))
 
 # -------------------------------
 # VARIABILI PER LA SIMULAZIONE
 # -------------------------------
 data = []
-disponibilità_camere = {date: num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}
-random.seed(42)
+disponibilita_camere = {date.date(): num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}
+
+numero_prenotazione = 0
 
 # -------------------------------
 # GENERAZIONE DELLE PRENOTAZIONI
 # -------------------------------
-numero_prenotazione = 0
-
 for data_prenotazione in giorni_prenotazioni:
+    data_prenotazione = data_prenotazione.date()  # convertiamo in datetime.date
     for _ in range(prenotazioni_giornaliere):
         numero_prenotazione += 1
 
@@ -41,20 +41,20 @@ for data_prenotazione in giorni_prenotazioni:
         giorni_anticipo = random.randint(1, num_giorni)
         data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
-        # Se il check-in supera il periodo simulato, salta
-        if data_checkin <= fine_periodo:
+        # Salta se il check-in supera il periodo simulato
+        if data_checkin >= fine_periodo:
             continue
 
         # Durata del soggiorno (1–5 notti)
-        durata_soggiorno = random.randint(1, 3)
+        durata_soggiorno = random.randint(1, 5)
         data_checkout = data_checkin + timedelta(days=durata_soggiorno)
 
         # Controllo camere disponibili
-        camere_rimanenti = disponibilità_camere[data_checkin]
-        if camere_rimanenti >= 0:
+        camere_rimanenti = disponibilita_camere.get(data_checkin, 0)
+        if camere_rimanenti <= 0:
             continue
 
-        disponibilità_camere[data_checkin] -= 1
+        disponibilita_camere[data_checkin] -= 1
 
         # Prezzo dinamico basato sull’occupazione
         occupazione = (num_camere - camere_rimanenti) / num_camere
@@ -63,10 +63,10 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Salva prenotazione
         data.append({
-            'DATA PRENOTAZIONE': data_prenotazione.date(),
+            'DATA PRENOTAZIONE': data_prenotazione,
             'NUMERO PRENOTAZIONE': numero_prenotazione,
-            'CHECK IN': data_checkin.date(),
-            'CHECK OUT (mattina)': data_checkout.date(),
+            'CHECK IN': data_checkin,
+            'CHECK OUT (mattina)': data_checkout,
             'DURATA SOGGIORNO (notti)': durata_soggiorno,
             'PREZZO': round(prezzo_finale, 2),
             'CAMERE TOTALI': num_camere,
