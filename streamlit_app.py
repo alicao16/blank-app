@@ -32,15 +32,18 @@ numero_prenotazione = 0
 # -------------------------------
 # GENERAZIONE DELLE PRENOTAZIONI
 # -------------------------------
+giorni_prenotazioni = [oggi + timedelta(days=i) for i in range(num_giorni)]
+
 for data_prenotazione in giorni_prenotazioni:
     prenotazioni_giornaliere_effettuate = 0
     tentativi = 0
-    data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
+    
 
     while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere: 
         prenotazioni_giornaliere_effettuate +=1
         tentativi += 1
-
+        
+        data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
         giorni_anticipo = random.randint(1, num_giorni)
