@@ -15,7 +15,7 @@ prenotazioni_giornaliere = st.sidebar.number_input("Prenotazioni giornaliere", 1
 min_price = st.sidebar.number_input("Prezzo minimo (€)", 50, 500, 100)
 max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
 alpha = 0.3
-beta = 0.2
+beta = 0.3
 
 check_in_iniziale = datetime.now().date()
 check_out_finale = check_in_iniziale + timedelta(days=num_giorni)
@@ -26,6 +26,7 @@ date_range = pd.date_range(start=check_in_iniziale, end=check_out_finale - timed
 # -------------------------------
 data = []
 disponibilita_camere = {date: num_camere for date in date_range}
+random.seed(42)
 
 # -------------------------------
 # GENERAZIONE DELLE PRENOTAZIONI
@@ -63,15 +64,20 @@ for giorno, single_date in enumerate(date_range, start=1):
             'NUMERO CAMERE OCCUPATE': num_camere - camere_rimanenti
         })
 
-
+# -------------------------------
+# CREAZIONE DEL DATAFRAME
+# -------------------------------
+df_prenotazioni = pd.DataFrame(data)
 
 # -------------------------------
 # VISUALIZZAZIONE CON STREAMLIT
 # -------------------------------
 st.subheader("📅 Prenotazioni Generate")
+st.dataframe(df_prenotazioni)
 
 # Grafico prezzi
 st.subheader("📈 Andamento Prezzi nel Tempo")
+st.line_chart(df_prenotazioni.set_index('CHECK IN')['PREZZO'])
 
 # Download CSV
 csv = df_prenotazioni.to_csv(index=False).encode('utf-8')
