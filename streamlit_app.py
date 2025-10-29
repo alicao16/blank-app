@@ -61,6 +61,8 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Prezzo dinamico basato sull’occupazione
         # Percentuale di camere libere
+        camere_rimanenti = min(disponibilita_camere[g] for giorno in giorni_soggiorno)
+        percentuale_libere = camere_rimanenti / num_camere
         percentuale_libere = disponibilità_camere / num_camere
 
         # Prezzo lineare: più camere libere, più vicino al min_price; più pieno, più vicino al max_price
