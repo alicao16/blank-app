@@ -34,7 +34,9 @@ numero_prenotazione = 0
 # -------------------------------
 for data_prenotazione in giorni_prenotazioni:
     data_prenotazione = data_prenotazione.date()  # convertiamo in datetime.date
-     while numero_prenotazione <= prenotazioni_giornaliere:      # per ogni giorno genera tot prenotazioni giornaliere
+    tentativi = 0
+    while prenotazioni_effettuate_giorno[data_prenotazione] < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere * 5:
+        tentativi += 1  # evita loop infinito
         numero_prenotazione += 1
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
