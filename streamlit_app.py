@@ -61,7 +61,7 @@ for data_prenotazione in giorni_prenotazioni:
         # camere rimanenti nel giorno più “critico” (minore disponibilità)
         camere_rimanenti = min(disponibilità_camere.get(g, 0) for g in giorni_soggiorno)
 
-        if camere_rimanenti = 0:
+        if camere_rimanenti == 0:
             continue
 
         # decrementa camere per ogni giorno del soggiorno
