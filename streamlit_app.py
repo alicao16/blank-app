@@ -15,14 +15,11 @@ prenotazioni_giornaliere = st.sidebar.number_input("Prenotazioni ricevute ogni g
 min_price = st.sidebar.number_input("Prezzo minimo (€)", 50, 500, 100)
 max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
 alpha = 0.3
-beta = 0.3
 
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)    # ultima data simulata
 giorni_prenotazioni = pd.date_range(start=oggi, end=fine_periodo - timedelta(days=1))
 
-# -------------------------------
-    LISTA
 # -------------------------------
 data = []
 disponibilità_camere = {date.date(): num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}  # camere disponibili per ogni giorno
@@ -51,16 +48,18 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Controllo camere disponibili
         camere_rimanenti = disponibilita_camere.get(data_checkin, 0)
-        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno)
-        continue
+        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno):  
+            continue
 
         for giorno in giorni_soggiorno:
             disponibilita_camere[data_checkin] -= 1
 
         # Prezzo dinamico basato sull’occupazione
-       occupazione = sum(num_camere - disponibilita_camere[g] for g in giorni_soggiorno) / (num_camere * durata_soggiorno)
-        incremento = alpha * math.tanh(beta * (1 - occupazione))
-        prezzo_finale = min_price + (max_price - min_price) * incremento
+        # Percentuale di camere libere
+        percentuale_libere = camere_rimanenti / num_camere
+
+        # Prezzo lineare: più camere libere, più vicino al min_price; più pieno, più vicino al max_price
+        prezzo_finale = min_price + (max_price - min_price)*(1 - percentuale_libere)*alpha
 
         # Salva prenotazione
         data.append({
