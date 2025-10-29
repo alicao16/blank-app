@@ -43,7 +43,6 @@ for data_prenotazione in giorni_prenotazioni:
         prenotazioni_giornaliere_effettuate +=1
         tentativi += 1
         
-        data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
         giorni_anticipo = random.randint(1, num_giorni)
