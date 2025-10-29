@@ -19,9 +19,9 @@ max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
 alpha = st.sidebar.number_input("Alpha", 0.1, 1.0, 0.1)
 beta= st.sidebar.number_input("Beta", 1.0, 5.0, 1.0)
 
-oggi = pd.Timestamp(datetime.now().date())
-fine_periodo = oggi + pd.Timedelta(days=num_giorni)
-data_checkin = pd.Timestamp(data_prenotazione) + pd.Timedelta(days=giorni_anticipo)
+oggi = datetime.now().date()
+fine_periodo = oggi + timedelta(days=num_giorni)
+data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
 # -------------------------------
 data = []
@@ -45,7 +45,7 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
         giorni_anticipo = random.randint(1, num_giorni)
-        data_checkin = data_prenotazione + pd.Timedelta(days=giorni_anticipo)
+        data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
         # Salta se il check-in supera il periodo simulato
         if data_checkin >= fine_periodo:
@@ -53,10 +53,10 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Durata del soggiorno
         durata_soggiorno = random.randint(1, 3)
-        data_checkout = data_checkin + pd.Timedelta(days=durata_soggiorno)
+        data_checkout = data_checkin + timedelta(days=durata_soggiorno)
 
         # lista dei giorni del soggiorno
-        giorni_soggiorno = [data_checkin + pd.Timedelta(days=i) for i in range(durata_soggiorno)]
+        giorni_soggiorno = [data_checkin + timedelta(days=i) for i in range(durata_soggiorno)]
 
         # camere rimanenti nel giorno più “critico” (minore disponibilità)
         camere_rimanenti = min(disponibilità_camere.get(g, 0) for g in giorni_soggiorno)
