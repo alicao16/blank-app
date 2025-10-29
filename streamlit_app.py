@@ -49,7 +49,7 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Salta se il check-in supera il periodo simulato
         if data_checkin >= fine_periodo:
-            continue
+            skip
 
         # Durata del soggiorno
         durata_soggiorno = random.randint(1, 3)
@@ -62,7 +62,7 @@ for data_prenotazione in giorni_prenotazioni:
         camere_rimanenti = min(disponibilità_camere.get(g, 0) for g in giorni_soggiorno)
 
         if camere_rimanenti <= 0:
-            continue
+            skip
 
         # decrementa camere per ogni giorno del soggiorno
         for giorno in giorni_soggiorno:
