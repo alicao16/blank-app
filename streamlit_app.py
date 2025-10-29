@@ -18,14 +18,14 @@ alpha = 0.3
 beta = 0.3
 
 oggi = datetime.now().date()
-fine_periodo = oggi + timedelta(days=num_giorni)
+fine_periodo = oggi + timedelta(days=num_giorni)      # quanti giorni prima riesco a fare prenotazione   
 giorni_prenotazioni = pd.date_range(start=oggi, end=fine_periodo - timedelta(days=1))
 
 # -------------------------------
 # VARIABILI PER LA SIMULAZIONE
 # -------------------------------
 data = []
-disponibilita_camere = {date: num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}
+disponibilità_camere = {date: num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}
 random.seed(42)
 
 # -------------------------------
@@ -42,19 +42,19 @@ for data_prenotazione in giorni_prenotazioni:
         data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
         # Se il check-in supera il periodo simulato, salta
-        if data_checkin >= fine_periodo:
+        if data_checkin <= fine_periodo:
             continue
 
         # Durata del soggiorno (1–5 notti)
-        durata_soggiorno = random.randint(1, 5)
+        durata_soggiorno = random.randint(1, 3)
         data_checkout = data_checkin + timedelta(days=durata_soggiorno)
 
         # Controllo camere disponibili
-        camere_rimanenti = disponibilita_camere[data_checkin]
-        if camere_rimanenti <= 0:
+        camere_rimanenti = disponibilità_camere[data_checkin]
+        if camere_rimanenti >= 0:
             continue
 
-        disponibilita_camere[data_checkin] -= 1
+        disponibilità_camere[data_checkin] -= 1
 
         # Prezzo dinamico basato sull’occupazione
         occupazione = (num_camere - camere_rimanenti) / num_camere
