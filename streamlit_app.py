@@ -33,12 +33,13 @@ numero_prenotazione = 0
 # GENERAZIONE DELLE PRENOTAZIONI
 # -------------------------------
 for data_prenotazione in giorni_prenotazioni:
-    data_prenotazione = data_prenotazione.date()  # convertiamo in datetime.date
+    data_prenotazione = data_prenotazione.date()
+    prenotazioni_giornaliere_effettuate = 0
     tentativi = 0
-    
-    while numero_prenotazione < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere * 5:
-        tentativi += 1           # evita loop infinito
-        numero_prenotazione += 1 # conta prenotazione
+
+    while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere * 5:
+        tentativi += 1
+        numero_prenotazione += 1
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
         giorni_anticipo = random.randint(1, num_giorni)
