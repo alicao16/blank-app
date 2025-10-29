@@ -37,7 +37,7 @@ for data_prenotazione in giorni_prenotazioni:
     prenotazioni_giornaliere_effettuate = 0
     tentativi = 0
 
-    while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere * 5:
+    while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere * 10:
         tentativi += 1
         numero_prenotazione += 1
 
