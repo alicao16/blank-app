@@ -72,7 +72,6 @@ st.subheader("📅 Prenotazioni Generate")
 
 # Grafico prezzi
 st.subheader("📈 Andamento Prezzi nel Tempo")
-st.line_chart(df_prenotazioni.set_index('CHECK IN')['PREZZO'])
 
 # Download CSV
 csv = df_prenotazioni.to_csv(index=False).encode('utf-8')
