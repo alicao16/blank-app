@@ -21,7 +21,7 @@ beta= st.sidebar.number_input("Beta", 1.0, 5.0, 1.0)
 
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)
-data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
+
 
 # -------------------------------
 data = []
@@ -36,6 +36,7 @@ for data_prenotazione in giorni_prenotazioni:
     prenotazioni_giornaliere_effettuate = 0
     tentativi = 0
 
+data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
     while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere: 
         prenotazioni_giornaliere_effettuate +=1
