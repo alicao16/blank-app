@@ -42,7 +42,7 @@ for data_prenotazione in giorni_prenotazioni:
         data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
         # Se il check-in supera il periodo simulato, salta
-        if data_checkin <= fine_periodo:
+        if data_checkin =< fine_periodo:
             continue
 
         # Durata del soggiorno (1–5 notti)
