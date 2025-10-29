@@ -35,8 +35,7 @@ numero_prenotazione = 0
 for data_prenotazione in giorni_prenotazioni:
     prenotazioni_giornaliere_effettuate = 0
     tentativi = 0
-
-data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
+    data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
 
     while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere: 
         prenotazioni_giornaliere_effettuate +=1
