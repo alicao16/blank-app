@@ -70,7 +70,7 @@ for data_prenotazione in giorni_prenotazioni:
             disponibilità_camere[giorno] -= 1
 
         # prezzo dinamico: più camere libere → più vicino al min_price, meno libere → più vicino al max_price
-        occupancy_rate = 1 - camere_rimanenti / num_camere  # 0 = vuoto, 1 = pieno
+        occupancy_rate = 1 - min(disponibilità_camere.get(data_checkin, num_camere) / num_camere, 1)  # 0 = vuoto, 1 = pieno
         prezzo_finale = min_price + (max_price - min_price) * (occupancy_rate ** alpha)
 
         
