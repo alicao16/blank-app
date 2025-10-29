@@ -71,8 +71,8 @@ for data_prenotazione in giorni_prenotazioni:
             disponibilità_camere[giorno] -= 1
 
         # prezzo dinamico: più camere libere → più vicino al min_price, meno libere → più vicino al max_price
-        x = alpha * (camere_occupate - (num_camere - 1)/2)
-        prezzo_finale = min_price + (max_price - min_price) * (0.5 * (1 + math.tanh(x/beta)))
+        x = num_camere - camere_rimanenti
+        prezzo_finale = min_price + (max_price - min_price) * (0.5 * (1 + math.tanh(alpha * (x - (num_camere-1)/2) / beta)))
 
         
         # Salva prenotazione
