@@ -46,25 +46,19 @@ for data_prenotazione in giorni_prenotazioni:
         durata_soggiorno = random.randint(1, 3)
         data_checkout = data_checkin + timedelta(days=durata_soggiorno)
 
-        # Lista dei giorni effettivi del soggiorno
+        # lista dei giorni del soggiorno
         giorni_soggiorno = [data_checkin + timedelta(days=i) for i in range(durata_soggiorno)]
 
-        # Controllo disponibilità camere per ogni giorno del soggiorno
-        if any(disponibilità_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno):
-            continue  # salta se anche un solo giorno non ha camere libere
+        # camere rimanenti nel giorno più “critico” (minore disponibilità)
+        camere_rimanenti = min(disponibilita_camere[g] for g in giorni_soggiorno)
 
-        # Decrementa camere per ogni giorno del soggiorno
-        for giorno in giorni_soggiorno:
-            disponibilità_camere[giorno] -= 1
+        # percentuale di camere libere
+        percentuale_libere = camere_rimanenti / num_camere
+
+        # prezzo dinamico: più camere libere → più vicino al min_price, meno libere → più vicino al max_price
+        prezzo_finale = min_price + (max_price - min_price) * (1 - percentuale_libere)*alpha
 
         
-
-        # Percentuale di camere libere
-        percentuale_libere = disponibilità_camere / num_camere
-
-        # Prezzo lineare: più camere libere, più vicino al min_price; più pieno, più vicino al max_price
-        prezzo_finale = min_price + (max_price - min_price)*(1 - percentuale_libere)*alpha
-
         # Salva prenotazione
         data.append({
             'DATA PRENOTAZIONE': data_prenotazione,
