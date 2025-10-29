@@ -50,7 +50,7 @@ for data_prenotazione in giorni_prenotazioni:
         giorni_soggiorno = [data_checkin + timedelta(days=i) for i in range(durata_soggiorno)]
 
         # camere rimanenti nel giorno più “critico” (minore disponibilità)
-        camere_rimanenti = min(disponibilita_camere[g] for g in giorni_soggiorno)
+        camere_rimanenti = min(disponibilità_camere[g] for g in giorni_soggiorno)
 
         # percentuale di camere libere
         percentuale_libere = camere_rimanenti / num_camere
