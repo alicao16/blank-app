@@ -39,7 +39,6 @@ for data_prenotazione in giorni_prenotazioni:
     while numero_prenotazione < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere * 5:
         tentativi += 1           # evita loop infinito
         numero_prenotazione += 1 # conta prenotazione
-        prenotazioni_effettuate_giorno[data_prenotazione] += 1
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
         giorni_anticipo = random.randint(1, num_giorni)
