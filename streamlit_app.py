@@ -69,7 +69,6 @@ for giorno, single_date in enumerate(date_range, start=1):
 # VISUALIZZAZIONE CON STREAMLIT
 # -------------------------------
 st.subheader("📅 Prenotazioni Generate")
-st.dataframe(df_prenotazioni)
 
 # Grafico prezzi
 st.subheader("📈 Andamento Prezzi nel Tempo")
