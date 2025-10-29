@@ -42,17 +42,20 @@ for data_prenotazione in giorni_prenotazioni:
         if data_checkin >= fine_periodo:
             continue
 
-        # Durata del soggiorno (1–5 notti)
+        # Durata del soggiorno
         durata_soggiorno = random.randint(1, 3)
         data_checkout = data_checkin + timedelta(days=durata_soggiorno)
 
-        
-        # Controllo camere disponibili
-        camere_rimanenti = disponibilità_camere.get(data_checkin, 0)
-        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in durata_soggiorno):  
-            continue
-        for giorno in durata_soggiorno:
-            disponibilità_camere[data_checkin] -= 1
+        # Lista dei giorni effettivi del soggiorno
+        giorni_soggiorno = [data_checkin + timedelta(days=i) for i in range(durata_soggiorno)]
+
+        # Controllo disponibilità camere per ogni giorno del soggiorno
+        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno):
+        continue  # salta se anche un solo giorno non ha camere libere
+
+        # Decrementa camere per ogni giorno del soggiorno
+        for giorno in giorni_soggiorno:
+        disponibilita_camere[giorno] -= 1
 
         
 
