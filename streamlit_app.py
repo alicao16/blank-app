@@ -35,11 +35,13 @@ numero_prenotazione = 0
 for data_prenotazione in giorni_prenotazioni:
     data_prenotazione = data_prenotazione.date()
     prenotazioni_giornaliere_effettuate = 0
+    tentativi = 0
 
 
     while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere:
         prenotazioni_giornaliere_effettuate +=1
-        numero_prenotazione += 1
+        tentativi += 1
+
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
         giorni_anticipo = random.randint(1, num_giorni)
@@ -81,7 +83,7 @@ for data_prenotazione in giorni_prenotazioni:
             'CAMERE TOTALI': num_camere,
             'CAMERE OCCUPATE QUEL GIORNO': num_camere - camere_rimanenti
         })
-
+        numero_prenotazione += 1
 # -------------------------------
 # CREAZIONE DEL DATAFRAME
 # -------------------------------
