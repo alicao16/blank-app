@@ -49,7 +49,7 @@ for data_prenotazione in giorni_prenotazioni:
         
         # Controllo camere disponibili
         camere_rimanenti = disponibilità_camere.get(data_checkin, 0)
-        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in durata soggiorno):  
+        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in durata_soggiorno):  
             continue
         for giorno in durata_soggiorno:
             disponibilità_camere[data_checkin] -= 1
