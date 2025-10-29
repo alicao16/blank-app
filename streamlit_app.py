@@ -18,14 +18,14 @@ alpha = 0.3
 beta = 0.3
 
 oggi = datetime.now().date()
-fine_periodo = oggi + timedelta(days=num_giorni)    # ultima data inclusa
+fine_periodo = oggi + timedelta(days=num_giorni)    # ultima data simulata
 giorni_prenotazioni = pd.date_range(start=oggi, end=fine_periodo - timedelta(days=1))
 
 # -------------------------------
-# VARIABILI PER LA SIMULAZIONE
+    LISTA
 # -------------------------------
 data = []
-disponibilita_camere = {date.date(): num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}
+disponibilità_camere = {date.date(): num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}  # camere disponibili per ogni giorno
 
 numero_prenotazione = 0
 
@@ -34,7 +34,7 @@ numero_prenotazione = 0
 # -------------------------------
 for data_prenotazione in giorni_prenotazioni:
     data_prenotazione = data_prenotazione.date()  # convertiamo in datetime.date
-    for _ in range(prenotazioni_giornaliere):
+    for _ in range(prenotazioni_giornaliere):      # per ogni giorno genera tot prenotazioni giornaliere
         numero_prenotazione += 1
 
         # Il check-in è da 1 a num_giorni dopo la prenotazione
@@ -46,18 +46,19 @@ for data_prenotazione in giorni_prenotazioni:
             continue
 
         # Durata del soggiorno (1–5 notti)
-        durata_soggiorno = random.randint(1, 5)
+        durata_soggiorno = random.randint(1, 3)
         data_checkout = data_checkin + timedelta(days=durata_soggiorno)
 
         # Controllo camere disponibili
         camere_rimanenti = disponibilita_camere.get(data_checkin, 0)
-        if camere_rimanenti <= 0:
-            continue
+        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno)
+        continue
 
-        disponibilita_camere[data_checkin] -= 1
+        for giorno in giorni_soggiorno:
+            disponibilita_camere[data_checkin] -= 1
 
         # Prezzo dinamico basato sull’occupazione
-        occupazione = (num_camere - camere_rimanenti) / num_camere
+       occupazione = sum(num_camere - disponibilita_camere[g] for g in giorni_soggiorno) / (num_camere * durata_soggiorno)
         incremento = alpha * math.tanh(beta * (1 - occupazione))
         prezzo_finale = min_price + (max_price - min_price) * incremento
 
