@@ -17,6 +17,7 @@ prenotazioni_giornaliere = st.sidebar.number_input("Prenotazioni ricevute ogni g
 min_price = st.sidebar.number_input("Prezzo minimo (€)", 50, 500, 100)
 max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
 alpha = st.sidebar.number_input("Alpha", 0.1, 1.0, 0.1)
+beta = st.sidebar.number_input("Beta", 0.1, 1.0, 0.1)
 
 
 oggi = datetime.now().date()
@@ -70,8 +71,8 @@ for data_prenotazione in giorni_prenotazioni:
             disponibilità_camere[giorno] -= 1
 
         # prezzo dinamico: più camere libere → più vicino al min_price, meno libere → più vicino al max_price
-        occupancy_rate = 1 - min(disponibilità_camere.get(data_checkin, num_camere) / num_camere, 1)  # 0 = vuoto, 1 = pieno
-        prezzo_finale = min_price + (max_price - min_price) * (occupancy_rate ** alpha)
+        x = alpha * (camere_occupate - (num_camere - 1)/2)
+        prezzo_finale = min_price + (max_price - min_price) * (0.5 * (1 + math.tanh(x/beta)))
 
         
         # Salva prenotazione
