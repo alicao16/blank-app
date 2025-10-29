@@ -13,7 +13,7 @@ st.title("🏨 Generatore Prenotazioni Hotel")
 
 num_camere = st.sidebar.number_input("Numero totale camere", 10, 200, 30)
 num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
-prenotazioni_giornaliere = st.sidebar.number_input("Prenotazioni ricevute ogni giorno", 1.0, 20, 1.0)
+prenotazioni_giornaliere = st.sidebar.number_input("Prenotazioni ricevute ogni giorno", 1, 20, 1
 min_price = st.sidebar.number_input("Prezzo minimo (€)", 50, 500, 100)
 max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
 alpha = st.sidebar.number_input("Alpha", 0.1, 1.0, 0.1)
