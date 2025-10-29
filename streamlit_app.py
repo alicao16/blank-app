@@ -52,7 +52,7 @@ for data_prenotazione in giorni_prenotazioni:
             continue
 
         for giorno in giorni_soggiorno:
-            disponibilita_camere[data_checkin] -= 1
+            disponibilità_camere[data_checkin] -= 1
 
         # Prezzo dinamico basato sull’occupazione
         # Percentuale di camere libere
