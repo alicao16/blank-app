@@ -14,8 +14,8 @@ num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365
 prenotazioni_giornaliere = st.sidebar.number_input("Prenotazioni ricevute ogni giorno", 1, 20, 5)
 min_price = st.sidebar.number_input("Prezzo minimo (€)", 50, 500, 100)
 max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
-alpha = 0.3
-beta= 0.3
+alpha = 1
+beta= 1
 
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)    # ultima data simulata
