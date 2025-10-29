@@ -34,7 +34,7 @@ numero_prenotazione = 0
 # -------------------------------
 for data_prenotazione in giorni_prenotazioni:
     data_prenotazione = data_prenotazione.date()  # convertiamo in datetime.date
-    for _ in range(prenotazioni_giornaliere):      # per ogni giorno genera tot prenotazioni giornaliere
+     while prenotazioni_effettuate_giorno[data_prenotazione] < prenotazioni_giornaliere:      # per ogni giorno genera tot prenotazioni giornaliere
         if numero_prenotazione >= prenotazioni_giornaliere:
             break
             
