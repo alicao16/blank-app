@@ -21,7 +21,7 @@ beta= st.sidebar.number_input("Beta", 1.0, 5.0, 1.0)
 
 oggi = pd.Timestamp(datetime.now().date())
 fine_periodo = oggi + pd.Timedelta(days=num_giorni)
-data_checkin = data_prenotazione + pd.Timedelta(days=giorni_anticipo)
+data_checkin = pd.Timestamp(data_prenotazione) + pd.Timedelta(days=giorni_anticipo)
 
 # -------------------------------
 data = []
