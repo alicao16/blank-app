@@ -50,7 +50,7 @@ for data_prenotazione in giorni_prenotazioni:
         giorni_soggiorno = [data_checkin + timedelta(days=i) for i in range(durata_soggiorno)]
 
         # Controllo disponibilità camere per ogni giorno del soggiorno
-        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno):
+        if any(disponibilità_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno):
             continue  # salta se anche un solo giorno non ha camere libere
 
         # Decrementa camere per ogni giorno del soggiorno
