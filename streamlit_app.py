@@ -70,11 +70,12 @@ for data_prenotazione in giorni_prenotazioni:
         for giorno in giorni_soggiorno:
             disponibilità_camere[giorno] -= 1
 
-        # centro della curva = metà delle camere occupate
-        centro = (num_camere - 1) / 2
-    
-        # funzione sigmoide basata su tanh
-        prezzo = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate - centro) / beta))
+        # Calcolo camere occupate
+        camere_occupate = num_camere - camere_rimanenti
+
+        # Prezzo dinamico basato su tanh
+        centro = (num_camere - 1) / 2  # metà delle camere
+        prezzo_finale = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate - centro) / beta))
 
         
         # Salva prenotazione
