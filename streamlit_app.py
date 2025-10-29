@@ -103,23 +103,15 @@ else:
     st.warning("Nessuna prenotazione generata. Prova a modificare i parametri nel menu laterale.")
 
 
-import altair as alt
+if not df_prenotazioni.empty:
+    st.subheader("💰 Prezzo vs Camere Occupate")
+    chart = alt.Chart(df_prenotazioni).mark_circle(size=60).encode(
+        x='CAMERE OCCUPATE QUEL GIORNO',
+        y='PREZZO',
+        tooltip=['DATA PRENOTAZIONE','CHECK IN','CAMERE OCCUPATE QUEL GIORNO','PREZZO']
+    ).interactive()
+    st.altair_chart(chart, use_container_width=True)
 
-# Calcolo camere occupate e prezzo medio giornaliero
-df_giornaliero = df_prenotazioni.groupby('CHECK IN').agg({
-    'NUMERO CAMERE OCCUPATE': 'sum',
-    'PREZZO': 'mean'
-}).reset_index().rename(columns={'NUMERO CAMERE OCCUPATE': 'Camere Occupate', 'PREZZO': 'Prezzo Medio'})
-
-st.subheader("📊 Prezzo medio vs Camere Occupate")
-
-chart = alt.Chart(df_giornaliero).mark_circle(size=80).encode(
-    x='Camere Occupate',
-    y='Prezzo Medio',
-    tooltip=['CHECK IN', 'Camere Occupate', 'Prezzo Medio']
-).interactive()
-
-st.altair_chart(chart, use_container_width=True)
 
 # Download CSV
 if not df_prenotazioni.empty:
