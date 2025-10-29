@@ -46,13 +46,15 @@ for data_prenotazione in giorni_prenotazioni:
         durata_soggiorno = random.randint(1, 3)
         data_checkout = data_checkin + timedelta(days=durata_soggiorno)
 
+        
         # Controllo camere disponibili
         camere_rimanenti = disponibilità_camere.get(data_checkin, 0)
-        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in giorni_soggiorno):  
+        if any(disponibilita_camere.get(giorno, 0) <= 0 for giorno in durata soggiorno):  
             continue
-
-        for giorno in giorni_soggiorno:
+        for giorno in durata_soggiorno:
             disponibilità_camere[data_checkin] -= 1
+
+        
 
         # Prezzo dinamico basato sull’occupazione
         # Percentuale di camere libere
