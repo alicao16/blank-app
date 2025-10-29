@@ -55,7 +55,7 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Decrementa camere per ogni giorno del soggiorno
         for giorno in giorni_soggiorno:
-        disponibilita_camere[giorno] -= 1
+            disponibilita_camere[giorno] -= 1
 
         
 
