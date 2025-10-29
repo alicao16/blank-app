@@ -33,7 +33,6 @@ numero_prenotazione = 0
 # GENERAZIONE DELLE PRENOTAZIONI
 # -------------------------------
 for data_prenotazione in giorni_prenotazioni:
-    data_prenotazione = data_prenotazione.date()
     prenotazioni_giornaliere_effettuate = 0
     tentativi = 0
 
