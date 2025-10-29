@@ -90,6 +90,11 @@ df_prenotazioni = pd.DataFrame(data)
 st.subheader("📅 Prenotazioni Generate")
 st.dataframe(df_prenotazioni)
 
+# Numero prenotazioni giornaliere
+st.subheader("📊 Numero Prenotazioni per Giorno")
+prenotazioni_giornaliere_df = df_prenotazioni.groupby('CHECK IN').size().rename("Numero Prenotazioni")
+st.bar_chart(prenotazioni_giornaliere_df)
+
 # Grafico prezzi nel tempo
 if not df_prenotazioni.empty:
     st.subheader("📈 Andamento Prezzi nel Tempo")
