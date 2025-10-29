@@ -74,11 +74,10 @@ for data_prenotazione in giorni_prenotazioni:
 
         # Calcolo camere occupate
         camere_occupate = num_camere - camere_rimanenti
-        centro = num_camere / 2
 
         # Prezzo dinamico basato su tanh
         # tanh(x) varia da -1 a +1, quindi la normalizziamo in [0,1]
-        prezzo_finale = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate - centro) / beta))
+        prezzo_finale = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate) / beta))
 
         
         # Salva prenotazione
