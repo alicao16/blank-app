@@ -19,9 +19,9 @@ max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
 alpha = st.sidebar.number_input("Alpha", 0.1, 1.0, 0.1)
 beta= st.sidebar.number_input("Beta", 1.0, 5.0, 1.0)
 
-oggi = datetime.now().date()
-fine_periodo = oggi + timedelta(days=num_giorni)    # ultima data simulata
-giorni_prenotazioni = pd.date_range(start=oggi, end=fine_periodo - timedelta(days=1))
+oggi = pd.Timestamp(datetime.now().date())
+fine_periodo = oggi + pd.Timedelta(days=num_giorni)
+giorni_prenotazioni = pd.date_range(start=oggi, end=fine_periodo - pd.Timedelta(days=1))
 
 # -------------------------------
 data = []
