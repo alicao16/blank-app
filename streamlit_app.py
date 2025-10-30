@@ -39,6 +39,13 @@ prezzi_base = df_prezzi_editor["Prezzo"].tolist()
 def conversion_rate(prezzo):
     return 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
 
+
+# Array/dizionario per camere occupate per giorno
+# -------------------------------
+camere_occupate_per_giorno = {oggi + timedelta(days=i): 0 for i in range(num_giorni)}
+prenotazioni_totali_per_giorno = {oggi + timedelta(days=i): 0 for i in range(num_giorni)}
+
+
 # -------------------------------
 # Simulazione prenotazioni per ogni giorno di check-in
 # -------------------------------
