@@ -18,7 +18,7 @@ sensibilità = 0.1
 
 oggi = datetime.now().date()
 
-# Prezzi base per giorno: tutti inizialmente 100€
+# Prezzi base per giorno
 prezzi_base = [100] * num_giorni
 
 # -------------------------------
@@ -31,51 +31,36 @@ def calcola_prenotazioni(prezzo, richieste, camere_disponibili):
     return min(int(richieste * conversion_rate(prezzo)), camere_disponibili)
 
 # -------------------------------
-# INIZIALIZZAZIONE
+# GENERAZIONE PRENOTAZIONI INIZIALI
 # -------------------------------
 disponibilità_camere = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
 data = []
 numero_prenotazione = 0
 
-# -------------------------------
-# GENERAZIONE DELLE PRENOTAZIONI
-# -------------------------------
 for giorno_corrente in range(num_giorni):
     data_prenotazione = oggi + timedelta(days=giorno_corrente)
-
     for giorni_avanti in range(1, num_giorni - giorno_corrente):
         data_checkin = data_prenotazione + timedelta(days=giorni_avanti)
-
-        # Prenotazioni effettive rispettando la disponibilità
-        prenotazioni_effettive = calcola_prenotazioni(
-            prezzi_base[giorni_avanti],
-            richiesto_N0,
-            disponibilità_camere[data_checkin]
-        )
-
-        # Aggiorna disponibilità
+        prenotazioni_effettive = calcola_prenotazioni(prezzi_base[giorni_avanti], richiesto_N0, disponibilità_camere[data_checkin])
         disponibilità_camere[data_checkin] -= prenotazioni_effettive
 
-        # Salva prenotazioni
-        data.append({
-            'DATA PRENOTAZIONE': data_prenotazione,
-            'NUMERO PRENOTAZIONE': numero_prenotazione,
-            'CHECK IN': data_checkin,
-            'PREZZO': prezzi_base[giorni_avanti],
-            'PRENOTAZIONI EFFETTIVE': prenotazioni_effettive,
-            'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
-        })
-        numero_prenotazione += 1
+        for _ in range(prenotazioni_effettive):
+            data.append({
+                'DATA PRENOTAZIONE': data_prenotazione,
+                'NUMERO PRENOTAZIONE': numero_prenotazione,
+                'CHECK IN': data_checkin,
+                'PREZZO': prezzi_base[giorni_avanti],
+                'PRENOTAZIONI EFFETTIVE': prenotazioni_effettive,
+                'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
+            })
+            numero_prenotazione += 1
 
-# -------------------------------
-# CREAZIONE DEL DATAFRAME
-# -------------------------------
 df_prenotazioni = pd.DataFrame(data)
 
 # -------------------------------
 # TABELLA INTERATTIVA
 # -------------------------------
-st.subheader("📅 Prenotazioni Generate")
+st.subheader("📅 Prenotazioni Generate (modifica prezzi)")
 df_editor = st.data_editor(
     df_prenotazioni,
     column_config={
@@ -85,8 +70,14 @@ df_editor = st.data_editor(
     hide_index=True
 )
 
-# Ricalcolo prenotazioni effettive rispettando disponibilità totale
+# -------------------------------
+# RICALCOLO PRENOTAZIONI E CAMERE OCCUPATE
+# -------------------------------
+# Reset disponibilità camere
 disponibilità_ricalcolata = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
+
+# Ordina per giorno di prenotazione
+df_editor = df_editor.sort_values("DATA PRENOTAZIONE").reset_index(drop=True)
 
 for idx, row in df_editor.iterrows():
     check_in = row['CHECK IN']
@@ -98,9 +89,9 @@ for idx, row in df_editor.iterrows():
 # -------------------------------
 # GRAFICO CAMERE OCCUPATE
 # -------------------------------
-camere_occupate_per_giorno = df_editor.groupby('CHECK IN')['PRENOTAZIONI EFFETTIVE'].sum()
 st.subheader("🏨 Camere Occupate per Giorno")
-st.bar_chart(camere_occupate_per_giorno)
+camere_occupate_per_giorno = df_editor.groupby('CHECK IN')['PRENOTAZIONI EFFETTIVE'].sum()
+st.bar_chart(came_occupate_per_giorno)
 
 # -------------------------------
 # DOWNLOAD CSV
