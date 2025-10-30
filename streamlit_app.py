@@ -92,7 +92,7 @@ for data_prenotazione in giorni_prenotazioni:
             'DURATA SOGGIORNO (notti)': durata_soggiorno,
             'PREZZO': round(prezzo_finale, 2),
             'CAMERE TOTALI': num_camere,
-            'CAMERE OCCUPATE QUEL GIORNO': num_camere - camere_rimanenti
+            'CAMERE OCCUPATE QUEL GIORNO': camere occupate
         })
         numero_prenotazione += 1
 # -------------------------------
