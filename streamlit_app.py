@@ -11,85 +11,85 @@ import altair as alt
 # -------------------------------
 st.title("🏨 Generatore Prenotazioni Hotel")
 
+
+richiesto_N0 = 20          # richieste iniziali
+scala_tempi = 50            # influenza dei giorni avanti
+scala_prezzi = 90           # sensibilità al prezzo
+sensibilità = 0.1           # pendenza della sigmoide per la conversione
+
 num_camere = st.sidebar.number_input("Numero totale camere", 10, 200, 30)
 num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
-prenotazioni_giornaliere = st.sidebar.number_input("Prenotazioni ricevute ogni giorno", 1, 20, 1)
-min_price = st.sidebar.number_input("Prezzo minimo (€)", 50, 500, 100)
-max_price = st.sidebar.number_input("Prezzo massimo (€)", 50, 1000, 200)
-alpha = 0.3
-beta = 2
 
 
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)
 
 
-# -------------------------------
+# Prezzi base per giorno 
+prezzi_base = [100] * 60    # 60 giorni con prezzo base 100€
+
+
+# Funzione conversion rate come sigmoide inversa del prezzo
+def conversion_rate(prezzo_attuale):
+    # formula sigmoide: più alto il prezzo, meno conversioni
+    return 1 / (1 + math.exp(sensibilità * (prezzo_attuale - scala_prezzi)))
+
+# Funzione prenotazioni
+def prenotazioni(prezzo, richieste, numero_camere):
+    c = conversion_rate(prezzo)
+    return min(int(richieste * c), numero_camere)
+
+
+# Esempio calcolo per tutti i giorni
+for giorno, prezzo in enumerate(prezzi_base):
+    r = richiesto_N0
+    n = prenotazioni(prezzo, r, numero_camere)
+    print(f"Giorno {giorno}: Prezzo={prezzo}, Prenotazioni={n}")
+    
+
+# Inizializza array/dizionario con tutte le date e 0 prenotazioni
+camere_occupate_per_giorno = {oggi + timedelta(days=i): 0 for i in range(num_giorni)}
 data = []
 disponibilità_camere = {date.date(): num_camere for date in pd.date_range(start=oggi, end=fine_periodo)}  # camere disponibili per ogni giorno
 
 numero_prenotazione = 0
 
-# -------------------------------
-# GENERAZIONE DELLE PRENOTAZIONI
-# -------------------------------
-giorni_prenotazioni = [oggi + timedelta(days=i) for i in range(num_giorni)]
 
-for data_prenotazione in giorni_prenotazioni:
-    prenotazioni_giornaliere_effettuate = 0
-    tentativi = 0
+# Inizializza disponibilità camere per ogni giorno futuro
+disponibilità_camere = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
+
+data = []
+numero_prenotazione = 0
+
+for giorno_corrente in range(num_giorni):
+    data_prenotazione = oggi + timedelta(days=giorno_corrente)
     
+    # Simula richieste per ogni check-in futuro
+    for giorni_avanti in range(1, num_giorni - giorno_corrente):
+        data_checkin = data_prenotazione + timedelta(days=giorni_avanti)
+        prezzo = prezzi_base[giorni_avanti]  # prezzo del giorno di check-in
 
-    while prenotazioni_giornaliere_effettuate < prenotazioni_giornaliere and tentativi < prenotazioni_giornaliere: 
-        tentativi += 1
-        
+        # Calcola quante prenotazioni avvengono per quel giorno
+        richieste = richiesto_N0
+        conv_rate = conversion_rate(prezzo)
+        prenotazioni_effettive = min(int(richieste * conv_rate), disponibilità_camere[data_checkin])
 
-        # Il check-in è da 1 a num_giorni dopo la prenotazione
-        giorni_anticipo = random.randint(1, num_giorni)
-        data_checkin = data_prenotazione + timedelta(days=giorni_anticipo)
+        # Aggiorna camere disponibili
+        disponibilità_camere[data_checkin] -= prenotazioni_effettive
 
-        # Salta se il check-in supera il periodo simulato
-        if data_checkin >= fine_periodo:
-            continue
-
-        # Durata del soggiorno
-        durata_soggiorno = random.randint(1, 3)
-        data_checkout = data_checkin + timedelta(days=durata_soggiorno)
-
-        # lista dei giorni del soggiorno
-        giorni_soggiorno = [data_checkin + timedelta(days=i) for i in range(durata_soggiorno)]
-
-        # 1) controllo disponibilità: ogni giorno del soggiorno deve avere almeno 1 camera
-        if any(disponibilità_camere.get(g, 0) <= 0 for g in giorni_soggiorno):
-            continue
-
-        # 2) calcolo camere occupate AL MOMENTO del check-in (prima di decrementare)
-        camere_disponibili_oggi = disponibilità_camere.get(data_checkin, 0)
-        camere_occupate = num_camere - camere_disponibili_oggi
-
-        # 3) calcolo prezzo basato su camere_occupate (tanh normalizzata)
-        centro = num_camere / 2
-        prezzo_finale = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate - centro) / beta))
-        prezzo_finale = round(prezzo_finale, 2)
-
-        # 4) ora decrementa 1 camera per ogni giorno del soggiorno (una camera riservata su più giorni)
-        for giorno in giorni_soggiorno:
-            if giorno in disponibilità_camere:
-                disponibilità_camere[giorno] -= 1
-        
-        # Salva prenotazione
-        data.append({
-            'DATA PRENOTAZIONE': data_prenotazione,
-            'NUMERO PRENOTAZIONE': numero_prenotazione,
-            'CHECK IN': data_checkin,
-            'CHECK OUT (mattina)': data_checkout,
-            'DURATA SOGGIORNO (notti)': durata_soggiorno,
-            'PREZZO': round(prezzo_finale, 2),
-            'CAMERE TOTALI': num_camere,
-            'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
-        })
-        numero_prenotazione += 1
-        prenotazioni_giornaliere_effettuate += 1
+        # Salva le prenotazioni
+        for _ in range(prenotazioni_effettive):
+            data.append({
+                'DATA PRENOTAZIONE': data_prenotazione,
+                'NUMERO PRENOTAZIONE': numero_prenotazione,
+                'CHECK IN': data_checkin,
+                'CHECK OUT (mattina)': data_checkin + timedelta(days=1),
+                'DURATA SOGGIORNO (notti)': 1,
+                'PREZZO': prezzo,
+                'CAMERE TOTALI': num_camere,
+                'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
+            })
+            numero_prenotazione += 1
 # -------------------------------
 # CREAZIONE DEL DATAFRAME
 # -------------------------------
