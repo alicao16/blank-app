@@ -18,21 +18,20 @@ sensibilità = st.sidebar.number_input("Sensibilità sigmoide", 0.01, 1.0, 0.1)
 oggi = datetime.now().date()
 
 # -------------------------------
-# Prezzi base per ogni giorno
+# Prezzi base modificabili
 # -------------------------------
 st.subheader("📌 Prezzi base (modificabili)")
-prezzi_editor = st.data_editor(
-    pd.DataFrame({"Giorni avanti": list(range(num_giorni)), "Prezzo": [100]*num_giorni}),
+df_prezzi = pd.DataFrame({
+    "Giorni avanti": list(range(num_giorni)),
+    "Prezzo": [100] * num_giorni
+})
+df_prezzi_editor = st.data_editor(
+    df_prezzi,
     column_config={"Prezzo": st.column_config.NumberColumn("Prezzo", min_value=0, step=1)},
     hide_index=True,
     use_container_width=True
 )
-prezzi_base = prezzi_editor["Prezzo"].tolist()
-
-# -------------------------------
-# Inizializza camere occupate per ogni giorno
-# -------------------------------
-camere_occupate_per_giorno = {oggi + timedelta(days=i): 0 for i in range(num_giorni)}
+prezzi_base = df_prezzi_editor["Prezzo"].tolist()
 
 # -------------------------------
 # Funzione conversion rate
@@ -41,54 +40,48 @@ def conversion_rate(prezzo):
     return 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
 
 # -------------------------------
-# Simulazione prenotazioni
+# Simulazione prenotazioni per ogni giorno di check-in
 # -------------------------------
-data = []
-numero_prenotazione = 0
+prenotazioni_totali_per_giorno = []
 
-for giorno_corrente in range(num_giorni):
-    data_prenotazione = oggi + timedelta(days=giorno_corrente)
+for giorni_avanti in range(num_giorni):
+    data_checkin = oggi + timedelta(days=giorni_avanti)
     
-    # Prenotazioni per tutti i check-in futuri
-    for giorni_avanti in range(1, num_giorni - giorno_corrente):
-        data_checkin = oggi + timedelta(days=giorni_avanti)
+    # Somma prenotazioni ricevute da tutti i giorni precedenti
+    totale_prenotazioni = 0
+    for giorno_corrente in range(giorni_avanti):
         prezzo = prezzi_base[giorni_avanti]
-
-        # Calcolo conversion rate
         conv_rate = conversion_rate(prezzo)
-
-        # Prenotazioni potenziali
         prenotazioni_da_aggiungere = int(richiesto_N0 * conv_rate)
+        totale_prenotazioni += prenotazioni_da_aggiungere
+    
+    # Limita al numero di camere disponibili
+    totale_prenotazioni = min(totale_prenotazioni, num_camere)
+    
+    conv_rate = conversion_rate(prezzi_base[giorni_avanti])
+    prenotazioni_totali_per_giorno.append({
+        "Giorni avanti": giorni_avanti,
+        "Prezzo": prezzi_base[giorni_avanti],
+        "Conversion rate": round(conv_rate, 4),
+        "Prenotazioni totali": totale_prenotazioni
+    })
 
-        # Limita prenotazioni totali a num_camere
-        posti_disponibili = num_camere - camere_occupate_per_giorno[data_checkin]
-        prenotazioni_effettive = min(prenotazioni_da_aggiungere, posti_disponibili)
-
-        # Aggiorna camere occupate
-        camere_occupate_per_giorno[data_checkin] += prenotazioni_effettive
-
-        # Salva prenotazioni individuali
-        for _ in range(prenotazioni_effettive):
-            data.append({
-                "DATA PRENOTAZIONE": data_prenotazione,
-                "NUMERO PRENOTAZIONE": numero_prenotazione,
-                "CHECK IN": data_checkin,
-                "PREZZO": prezzo,
-                "CONVERSION RATE": round(conv_rate, 4),
-                "CAMERE OCCUPATE": camere_occupate_per_giorno[data_checkin]
-            })
-            numero_prenotazione += 1
-
-# -------------------------------
-# Creazione DataFrame
-# -------------------------------
-df_prenotazioni = pd.DataFrame(data)
+df_prenotazioni = pd.DataFrame(prenotazioni_totali_per_giorno)
 
 # -------------------------------
 # Visualizzazione Streamlit
 # -------------------------------
-st.subheader("📅 Prenotazioni generate")
-st.dataframe(df_prenotazioni)
+st.subheader("📅 Prenotazioni per giorno di check-in")
+st.data_editor(
+    df_prenotazioni,
+    column_config={
+        "Prezzo": st.column_config.NumberColumn("Prezzo", min_value=0, step=1),
+        "Conversion rate": st.column_config.NumberColumn("Conversion rate", disabled=True),
+        "Prenotazioni totali": st.column_config.NumberColumn("Prenotazioni totali", disabled=True)
+    },
+    hide_index=True,
+    use_container_width=True
+)
 
 st.subheader("🏨 Camere occupate per giorno")
-st.bar_chart(pd.DataFrame.from_dict(camere_occupate_per_giorno, orient="index", columns=["Camere Occupate"]))
+st.bar_chart(df_prenotazioni.set_index("Giorni avanti")["Prenotazioni totali"])
