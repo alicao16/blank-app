@@ -74,7 +74,8 @@ for data_prenotazione in giorni_prenotazioni:
 
         # 4) ora decrementa 1 camera per ogni giorno del soggiorno (una camera riservata su più giorni)
         for giorno in giorni_soggiorno:
-            disponibilità_camere[giorno] -= 1
+            if giorno in disponibilità_camere:
+                disponibilità_camere[giorno] -= 1
         
         # Salva prenotazione
         data.append({
@@ -85,7 +86,7 @@ for data_prenotazione in giorni_prenotazioni:
             'DURATA SOGGIORNO (notti)': durata_soggiorno,
             'PREZZO': round(prezzo_finale, 2),
             'CAMERE TOTALI': num_camere,
-            'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[giorno]
+            'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
         })
         numero_prenotazione += 1
         prenotazioni_giornaliere_effettuate += 1
