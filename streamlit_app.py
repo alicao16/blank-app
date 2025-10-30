@@ -20,10 +20,9 @@ oggi = datetime.now().date()
 # -------------------------------
 # Prezzi base per ogni giorno
 # -------------------------------
-prezzi_base = [100] * num_giorni  # inizialmente 100€
 st.subheader("📌 Prezzi base (modificabili)")
 prezzi_editor = st.data_editor(
-    pd.DataFrame({"Giorni avanti": list(range(num_giorni)), "Prezzo": prezzi_base}),
+    pd.DataFrame({"Giorni avanti": list(range(num_giorni)), "Prezzo": [100]*num_giorni}),
     column_config={"Prezzo": st.column_config.NumberColumn("Prezzo", min_value=0, step=1)},
     hide_index=True,
     use_container_width=True
@@ -31,9 +30,15 @@ prezzi_editor = st.data_editor(
 prezzi_base = prezzi_editor["Prezzo"].tolist()
 
 # -------------------------------
-# Array/dizionario per camere occupate per giorno
+# Inizializza camere occupate per ogni giorno
 # -------------------------------
 camere_occupate_per_giorno = {oggi + timedelta(days=i): 0 for i in range(num_giorni)}
+
+# -------------------------------
+# Funzione conversion rate
+# -------------------------------
+def conversion_rate(prezzo):
+    return 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
 
 # -------------------------------
 # Simulazione prenotazioni
@@ -44,25 +49,25 @@ numero_prenotazione = 0
 for giorno_corrente in range(num_giorni):
     data_prenotazione = oggi + timedelta(days=giorno_corrente)
     
-    # Genera prenotazioni per ogni check-in futuro
+    # Prenotazioni per tutti i check-in futuri
     for giorni_avanti in range(1, num_giorni - giorno_corrente):
-        data_checkin = data_prenotazione + timedelta(days=giorni_avanti)
+        data_checkin = oggi + timedelta(days=giorni_avanti)
         prezzo = prezzi_base[giorni_avanti]
 
-        # Conversion rate inversamente proporzionale al prezzo
-        conv_rate = 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
+        # Calcolo conversion rate
+        conv_rate = conversion_rate(prezzo)
 
-        # Numero di prenotazioni desiderato
+        # Prenotazioni potenziali
         prenotazioni_da_aggiungere = int(richiesto_N0 * conv_rate)
 
-        # Limita le prenotazioni in modo che non superino num_camere
-        prenotazioni_effettive = 0
-        while prenotazioni_da_aggiungere > 0 and camere_occupate_per_giorno[data_checkin] < num_camere:
-            camere_occupate_per_giorno[data_checkin] += 1
-            prenotazioni_effettive += 1
-            prenotazioni_da_aggiungere -= 1
+        # Limita prenotazioni totali a num_camere
+        posti_disponibili = num_camere - camere_occupate_per_giorno[data_checkin]
+        prenotazioni_effettive = min(prenotazioni_da_aggiungere, posti_disponibili)
 
-        # Salva prenotazioni
+        # Aggiorna camere occupate
+        camere_occupate_per_giorno[data_checkin] += prenotazioni_effettive
+
+        # Salva prenotazioni individuali
         for _ in range(prenotazioni_effettive):
             data.append({
                 "DATA PRENOTAZIONE": data_prenotazione,
