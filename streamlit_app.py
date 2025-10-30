@@ -25,8 +25,15 @@ oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)
 
 
-# Prezzi base per giorno 
-prezzi_base = [100] * 60    # 60 giorni con prezzo base 100€
+# Prezzi base per giorno: input modificabile dall'utente
+st.sidebar.subheader("Prezzi base per giorno")
+prezzi_input = st.sidebar.text_area(
+    "Inserisci i prezzi separati da virgola",
+    value="100," * num_giorni  # default 100€ per tutti i giorni
+)
+# Trasforma in lista di float
+prezzi_base = [float(p.strip()) for p in prezzi_input.split(",") if p.strip()]
+
 
 
 # Funzione conversion rate come sigmoide inversa del prezzo
@@ -116,25 +123,7 @@ for _, row in df_prenotazioni.iterrows():
 df_camere_occupate = pd.DataFrame(list(camere_occupate_per_giorno.items()), columns=["Data", "Camere Occupate"])
 df_camere_occupate = df_camere_occupate.sort_values("Data").set_index("Data")
 
-# Grafico Streamlit
-st.bar_chart(df_camere_occupate)
 
-# Grafico prezzi nel tempo
-if not df_prenotazioni.empty:
-    st.subheader("📈 Andamento Prezzi nel Tempo")
-    st.scatter_chart(df_prenotazioni.set_index('CHECK IN')['PREZZO'])
-else:
-    st.warning("Nessuna prenotazione generata. Prova a modificare i parametri nel menu laterale.")
-
-
-if not df_prenotazioni.empty:
-    st.subheader("💰 Prezzo vs Camere Occupate")
-    chart = alt.Chart(df_prenotazioni).mark_circle(size=60).encode(
-        x='CAMERE OCCUPATE QUEL GIORNO',
-        y='PREZZO',
-        tooltip=['DATA PRENOTAZIONE','CHECK IN','CAMERE OCCUPATE QUEL GIORNO','PREZZO']
-    ).interactive()
-    st.altair_chart(chart, use_container_width=True)
 
 
 # Download CSV
