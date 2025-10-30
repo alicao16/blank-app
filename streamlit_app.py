@@ -122,7 +122,7 @@ st.bar_chart(df_camere_occupate)
 # Grafico prezzi nel tempo
 if not df_prenotazioni.empty:
     st.subheader("📈 Andamento Prezzi nel Tempo")
-    st.line_chart(df_prenotazioni.set_index('CHECK IN')['PREZZO'])
+    st.dot_chart(df_prenotazioni.set_index('CHECK IN')['PREZZO'])
 else:
     st.warning("Nessuna prenotazione generata. Prova a modificare i parametri nel menu laterale.")
 
