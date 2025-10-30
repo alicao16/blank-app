@@ -8,98 +8,89 @@ import math
 # -------------------------------
 st.title("🏨 Generatore Prenotazioni Hotel")
 
+# Sidebar
 num_camere = st.sidebar.number_input("Numero totale camere", 10, 200, 30)
 num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
 
-# Parametri simulazione
-richiesto_N0 = 20
-scala_prezzi = 90
-sensibilità = 0.1
+richiesto_N0 = 20       # richieste iniziali
+scala_prezzi = 90       # scala prezzi
+sensibilità = 0.1       # pendenza sigmoide
 
 oggi = datetime.now().date()
 
-# Prezzi base per giorno
+# -------------------------------
+# Tabella prezzi modificabili
+# -------------------------------
 prezzi_base = [100] * num_giorni
+df_prezzi = pd.DataFrame({
+    "Giorni avanti": list(range(num_giorni)),
+    "Prezzo": prezzi_base
+})
 
-# -------------------------------
-# FUNZIONI
-# -------------------------------
-def conversion_rate(prezzo):
-    return 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
-
-def calcola_prenotazioni(prezzo, richieste, camere_disponibili):
-    return min(int(richieste * conversion_rate(prezzo)), camere_disponibili)
-
-# -------------------------------
-# GENERAZIONE PRENOTAZIONI INIZIALI
-# -------------------------------
-disponibilità_camere = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
-data = []
-numero_prenotazione = 0
-
-for giorno_corrente in range(num_giorni):
-    data_prenotazione = oggi + timedelta(days=giorno_corrente)
-    for giorni_avanti in range(1, num_giorni - giorno_corrente):
-        data_checkin = data_prenotazione + timedelta(days=giorni_avanti)
-        prenotazioni_effettive = calcola_prenotazioni(prezzi_base[giorni_avanti], richiesto_N0, disponibilità_camere[data_checkin])
-        disponibilità_camere[data_checkin] -= prenotazioni_effettive
-
-        for _ in range(prenotazioni_effettive):
-            data.append({
-                'DATA PRENOTAZIONE': data_prenotazione,
-                'NUMERO PRENOTAZIONE': numero_prenotazione,
-                'CHECK IN': data_checkin,
-                'PREZZO': prezzi_base[giorni_avanti],
-                'PRENOTAZIONI EFFETTIVE': prenotazioni_effettive,
-                'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
-            })
-            numero_prenotazione += 1
-
-df_prenotazioni = pd.DataFrame(data)
-
-# -------------------------------
-# TABELLA INTERATTIVA
-# -------------------------------
-st.subheader("📅 Prenotazioni Generate (modifica prezzi)")
+st.subheader("📊 Prezzi per giorno (modificabili)")
 df_editor = st.data_editor(
-    df_prenotazioni,
-    column_config={
-        "PREZZO": st.column_config.NumberColumn("Prezzo", step=1, min_value=0)
-    },
-    disabled=["DATA PRENOTAZIONE", "NUMERO PRENOTAZIONE", "CHECK IN", "CAMERE OCCUPATE QUEL GIORNO"],
+    df_prezzi,
+    column_config={"Prezzo": st.column_config.NumberColumn("Prezzo", step=1, min_value=0)},
     hide_index=True
 )
 
 # -------------------------------
-# RICALCOLO PRENOTAZIONI E CAMERE OCCUPATE
+# Calcolo prenotazioni
 # -------------------------------
-# Reset disponibilità camere
-disponibilità_ricalcolata = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
+# Disponibilità camere per ogni giorno futuro
+disponibilità_camere = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
+data = []
 
-# Ordina per giorno di prenotazione
-df_editor = df_editor.sort_values("DATA PRENOTAZIONE").reset_index(drop=True)
+for giorno_corrente in range(num_giorni):
+    data_prenotazione = oggi + timedelta(days=giorno_corrente)
 
-for idx, row in df_editor.iterrows():
-    check_in = row['CHECK IN']
-    prenotazioni_eff = calcola_prenotazioni(row['PREZZO'], richiesto_N0, disponibilità_ricalcolata[check_in])
-    df_editor.at[idx, 'PRENOTAZIONI EFFETTIVE'] = prenotazioni_eff
-    disponibilità_ricalcolata[check_in] -= prenotazioni_eff
-    df_editor.at[idx, 'CAMERE OCCUPATE QUEL GIORNO'] = num_camere - disponibilità_ricalcolata[check_in]
+    # Simula richieste per ogni check-in futuro
+    for giorni_avanti in range(1, num_giorni - giorno_corrente):
+        check_in = data_prenotazione + timedelta(days=giorni_avanti)
+        prezzo = df_editor.at[giorni_avanti, "Prezzo"]
+
+        # Richieste decrescono all'aumentare dei giorni avanti
+        richieste = max(richiesto_N0 - giorni_avanti, 1)
+
+        # Conversion rate sigmoide inversa del prezzo
+        conv_rate = 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
+
+        # Prenotazioni effettive limitate dalla disponibilità camere
+        prenotazioni_eff = min(int(richieste * conv_rate), disponibilità_camere[check_in])
+        disponibilità_camere[check_in] -= prenotazioni_eff
+
+        # Salva dati prenotazione
+        data.append({
+            "DATA PRENOTAZIONE": data_prenotazione,
+            "CHECK IN": check_in,
+            "Prezzo": prezzo,
+            "Richieste": richieste,
+            "Conversion rate": round(conv_rate, 4),
+            "Prenotazioni": prenotazioni_eff,
+            "Camere occupate quel giorno": num_camere - disponibilità_camere[check_in]
+        })
 
 # -------------------------------
-# GRAFICO CAMERE OCCUPATE
+# Creazione DataFrame prenotazioni
 # -------------------------------
-st.subheader("🏨 Camere Occupate per Giorno")
-camere_occupate_per_giorno = df_editor.groupby('CHECK IN')['PRENOTAZIONI EFFETTIVE'].sum()
-st.bar_chart(camere_occupate_per_giorno)
+df_prenotazioni = pd.DataFrame(data)
 
 # -------------------------------
-# DOWNLOAD CSV
+# Visualizzazione
 # -------------------------------
-csv = df_editor.to_csv(index=False).encode('utf-8')
+st.subheader("📅 Prenotazioni generate")
+st.dataframe(df_prenotazioni)
+
+# Grafico camere occupate per giorno
+st.subheader("🏨 Camere occupate per giorno")
+camere_per_giorno = df_prenotazioni.groupby('CHECK IN')['Prenotazioni'].sum()
+st.bar_chart(camere_per_giorno)
+
+# Download CSV
+csv = df_prenotazioni.to_csv(index=False).encode('utf-8')
 st.download_button(
-    label="💾 Scarica CSV delle prenotazioni",
-    data=csv,
-    file_name='prenotazioni_hotel.csv',
-    mime='text/csv'
+    "💾 Scarica CSV",
+    csv,
+    file_name="prenotazioni_hotel.csv",
+    mime="text/csv"
 )
