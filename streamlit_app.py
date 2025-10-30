@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 import math
+import altair as alt
 
 # -------------------------------
 # Parametri principali
@@ -39,12 +40,10 @@ prezzi_base = df_prezzi_editor["Prezzo"].tolist()
 def conversion_rate(prezzo):
     return 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
 
-
-# Array/dizionario per camere occupate per giorno
+# -------------------------------
+# Array/dizionari per prenotazioni
 # -------------------------------
 camere_occupate_per_giorno = {oggi + timedelta(days=i): 0 for i in range(num_giorni)}
-prenotazioni_totali_per_giorno = {oggi + timedelta(days=i): 0 for i in range(num_giorni)}
-
 
 # -------------------------------
 # Simulazione prenotazioni per ogni giorno di check-in
@@ -54,16 +53,17 @@ prenotazioni_totali_per_giorno = []
 for giorni_avanti in range(num_giorni):
     data_checkin = oggi + timedelta(days=giorni_avanti)
     
-    # Somma prenotazioni ricevute da tutti i giorni precedenti
     totale_prenotazioni = 0
+    
+    # Somma prenotazioni ricevute da tutti i giorni precedenti
     for giorno_corrente in range(giorni_avanti):
         prezzo = prezzi_base[giorni_avanti]
         conv_rate = conversion_rate(prezzo)
         prenotazioni_da_aggiungere = int(richiesto_N0 * conv_rate)
+        # Limita per non superare le camere totali
+        disponibile = num_camere - totale_prenotazioni
+        prenotazioni_da_aggiungere = min(prenotazioni_da_aggiungere, disponibile)
         totale_prenotazioni += prenotazioni_da_aggiungere
-    
-    # Limita al numero di camere disponibili
-    totale_prenotazioni = min(totale_prenotazioni, num_camere)
     
     conv_rate = conversion_rate(prezzi_base[giorni_avanti])
     prenotazioni_totali_per_giorno.append({
@@ -97,12 +97,9 @@ st.bar_chart(df_prenotazioni.set_index("Giorni avanti")["Prenotazioni totali"])
 # Grafico Prezzo vs Conversion rate
 # -------------------------------
 st.subheader("📈 Prezzo vs Conversion rate")
-import altair as alt
-
 chart = alt.Chart(df_prenotazioni).mark_circle(size=80).encode(
     x='Prezzo',
     y='Conversion rate',
     tooltip=['Giorni avanti', 'Prezzo', 'Conversion rate', 'Prenotazioni totali']
 ).interactive()
-
 st.altair_chart(chart, use_container_width=True)
