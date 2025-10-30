@@ -15,8 +15,8 @@ scala_tempi = 50         # influenza dei giorni avanti
 scala_prezzi = 90        # sensibilità al prezzo
 sensibilità = 0.1        # pendenza della sigmoide per la conversione
 
-num_camere = st.number_input("Numero totale camere", 10, 200, 30)
-num_giorni = st.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
+num_camere = st.sidebar.number_input("Numero totale camere", 10, 200, 30)
+num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
 
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)
