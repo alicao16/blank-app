@@ -100,7 +100,7 @@ for idx, row in df_editor.iterrows():
 # -------------------------------
 camere_occupate_per_giorno = df_editor.groupby('CHECK IN')['PRENOTAZIONI EFFETTIVE'].sum()
 st.subheader("🏨 Camere Occupate per Giorno")
-st.bar_chart(came_occupate_per_giorno)
+st.bar_chart(camere_occupate_per_giorno)
 
 # -------------------------------
 # DOWNLOAD CSV
