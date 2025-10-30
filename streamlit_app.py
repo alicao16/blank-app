@@ -43,7 +43,7 @@ def prenotazioni(prezzo, richieste, numero_camere):
 # Esempio calcolo per tutti i giorni
 for giorno, prezzo in enumerate(prezzi_base):
     r = richiesto_N0
-    n = prenotazioni(prezzo, r, numero_camere)
+    n = prenotazioni(prezzo, r, num_camere)
     print(f"Giorno {giorno}: Prezzo={prezzo}, Prenotazioni={n}")
     
 
