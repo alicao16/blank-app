@@ -102,9 +102,22 @@ st.subheader("📅 Prenotazioni Generate")
 st.dataframe(df_prenotazioni)
 
 # Numero prenotazioni giornaliere
-st.subheader("📊 Numero Prenotazioni per Giorno")
-prenotazioni_giornaliere_df = df_prenotazioni.groupby('CHECK IN').size().rename("Numero Prenotazioni")
-st.bar_chart(prenotazioni_giornaliere_df)
+st.subheader("🏨 Camere Occupate per Giorno (effettive)")
+
+# Calcolo camere occupate per giorno
+camere_occupate_per_giorno = {}
+
+for _, row in df_prenotazioni.iterrows():
+    giorni_soggiorno = pd.date_range(start=row['CHECK IN'], end=row['CHECK OUT (mattina)'] - timedelta(days=1))
+    for g in giorni_soggiorno:
+        camere_occupate_per_giorno[g.date()] = camere_occupate_per_giorno.get(g.date(), 0) + 1
+
+# Conversione in DataFrame ordinato per data
+df_camere_occupate = pd.DataFrame(list(camere_occupate_per_giorno.items()), columns=["Data", "Camere Occupate"])
+df_camere_occupate = df_camere_occupate.sort_values("Data").set_index("Data")
+
+# Grafico Streamlit
+st.bar_chart(df_camere_occupate)
 
 # Grafico prezzi nel tempo
 if not df_prenotazioni.empty:
