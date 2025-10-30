@@ -10,14 +10,13 @@ import altair as alt
 # -------------------------------
 st.title("🏨 Generatore Prenotazioni Hotel")
 
-# Parametri di simulazione
 richiesto_N0 = 20       # richieste iniziali
 scala_tempi = 50         # influenza dei giorni avanti
 scala_prezzi = 90        # sensibilità al prezzo
 sensibilità = 0.1        # pendenza della sigmoide per la conversione
 
-num_camere = st.sidebar.number_input("Numero totale camere", 10, 200, 30)
-num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
+num_camere = st.number_input("Numero totale camere", 10, 200, 30)
+num_giorni = st.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
 
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)
@@ -25,15 +24,14 @@ fine_periodo = oggi + timedelta(days=num_giorni)
 # -------------------------------
 # PREZZI BASE PER GIORNO (modificabili)
 # -------------------------------
-st.sidebar.subheader("Prezzi base per giorno")
-# Creiamo un DataFrame con tutte le date e prezzi iniziali
+st.subheader("Prezzi base per giorno")
 df_prezzi = pd.DataFrame({
     "Data": [oggi + timedelta(days=i) for i in range(num_giorni)],
     "Prezzo": [100] * num_giorni
 })
 
-# Tabella interattiva modificabile dall'utente
-df_prezzi_mod = st.sidebar.data_editor(df_prezzi, num_rows="dynamic")
+# Tabella interattiva nella pagina principale
+df_prezzi_mod = st.data_editor(df_prezzi, num_rows="dynamic")
 prezzi_base = df_prezzi_mod["Prezzo"].tolist()
 
 # -------------------------------
@@ -51,7 +49,6 @@ def calcola_prenotazioni(prezzo, richieste, numero_camere):
 # -------------------------------
 # INIZIALIZZAZIONE
 # -------------------------------
-# Disponibilità camere per ogni giorno
 disponibilità_camere = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
 data = []
 numero_prenotazione = 0
@@ -68,12 +65,15 @@ for giorno_corrente in range(num_giorni):
         prezzo = prezzi_base[giorni_avanti]  # prezzo del giorno di check-in
 
         richieste = richiesto_N0
-        prenotazioni_effettive = min(calcola_prenotazioni(prezzo, richieste, disponibilità_camere[data_checkin]), disponibilità_camere[data_checkin])
+        prenotazioni_effettive = min(
+            calcola_prenotazioni(prezzo, richieste, disponibilità_camere[data_checkin]),
+            disponibilità_camere[data_checkin]
+        )
 
         # Aggiorna disponibilità camere
         disponibilità_camere[data_checkin] -= prenotazioni_effettive
 
-        # Salva prenotazioni
+        # Salva le prenotazioni
         for _ in range(prenotazioni_effettive):
             data.append({
                 'DATA PRENOTAZIONE': data_prenotazione,
@@ -98,7 +98,6 @@ df_prenotazioni = pd.DataFrame(data)
 st.subheader("📅 Prenotazioni Generate")
 st.dataframe(df_prenotazioni)
 
-# Camere occupate per giorno
 st.subheader("🏨 Camere Occupate per Giorno (effettive)")
 camere_occupate_per_giorno = {}
 for _, row in df_prenotazioni.iterrows():
