@@ -60,25 +60,26 @@ for data_prenotazione in giorni_prenotazioni:
         # lista dei giorni del soggiorno
         giorni_soggiorno = [data_checkin + timedelta(days=i) for i in range(durata_soggiorno)]
 
-        # camere rimanenti nel giorno più “critico” (minore disponibilità)
-        camere_rimanenti = disponibilità_camere[data_checkin]
-
-        if camere_rimanenti == 0:
+        # 1) controllo disponibilità: ogni giorno del soggiorno deve avere almeno 1 camera
+        if any(disponibilità_camere.get(g, 0) <= 0 for g in giorni_soggiorno):
             continue
 
-         # Calcolo camere occupate
-        camere_occupate_oggi = num_camere - disponibilità_camere[data_checkin]
-        centro = num_camere / 2 
+        # 2) calcolo camere occupate AL MOMENTO del check-in (prima di decrementare)
+        camere_disponibili_oggi = disponibilità_camere.get(data_checkin, 0)
+        camere_occupate = num_camere - camere_disponibili_oggi
 
-        # Prezzo dinamico basato su tanh
-        # tanh(x) varia da -1 a +1, quindi la normalizziamo in [0,1]
-        prezzo_finale = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate_oggi - centro) / beta))
-        
+        # 3) calcolo prezzo basato su camere_occupate (tanh normalizzata)
+        centro = num_camere / 2
+        prezzo_finale = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate - centro) / beta))
+        prezzo_finale = round(prezzo_finale, 2)
 
-        # decrementa camere per ogni giorno del soggiorno
+        # 4) ora decrementa 1 camera per ogni giorno del soggiorno (una camera riservata su più giorni)
         for giorno in giorni_soggiorno:
-            disponibilità_camere[data_checkin] -= 1
+            disponibilità_camere[giorno] -= 1
 
+    
+        numero_prenotazione += 1
+        prenotazioni_giornaliere_effettuate += 1
 
 
         
