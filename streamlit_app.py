@@ -85,3 +85,17 @@ st.data_editor(
 
 st.subheader("🏨 Camere occupate per giorno")
 st.bar_chart(df_prenotazioni.set_index("Giorni avanti")["Prenotazioni totali"])
+
+# -------------------------------
+# Grafico Prezzo vs Conversion rate
+# -------------------------------
+st.subheader("📈 Prezzo vs Conversion rate")
+import altair as alt
+
+chart = alt.Chart(df_prenotazioni).mark_circle(size=80).encode(
+    x='Prezzo',
+    y='Conversion rate',
+    tooltip=['Giorni avanti', 'Prezzo', 'Conversion rate', 'Prenotazioni totali']
+).interactive()
+
+st.altair_chart(chart, use_container_width=True)
