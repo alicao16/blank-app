@@ -76,12 +76,6 @@ for data_prenotazione in giorni_prenotazioni:
         # 4) ora decrementa 1 camera per ogni giorno del soggiorno (una camera riservata su più giorni)
         for giorno in giorni_soggiorno:
             disponibilità_camere[giorno] -= 1
-
-    
-        numero_prenotazione += 1
-        prenotazioni_giornaliere_effettuate += 1
-
-
         
         # Salva prenotazione
         data.append({
@@ -95,6 +89,7 @@ for data_prenotazione in giorni_prenotazioni:
             'CAMERE OCCUPATE QUEL GIORNO': camere_occupate
         })
         numero_prenotazione += 1
+        prenotazioni_giornaliere_effettuate += 1
 # -------------------------------
 # CREAZIONE DEL DATAFRAME
 # -------------------------------
