@@ -10,13 +10,15 @@ import altair as alt
 # -------------------------------
 st.title("🏨 Generatore Prenotazioni Hotel")
 
-richiesto_N0 = 20       # richieste iniziali
-scala_tempi = 50         # influenza dei giorni avanti
-scala_prezzi = 90        # sensibilità al prezzo
-sensibilità = 0.1        # pendenza della sigmoide per la conversione
-
+# Sidebar per parametri principali
 num_camere = st.sidebar.number_input("Numero totale camere", 10, 200, 30)
 num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
+
+# Parametri della simulazione
+richiesto_N0 = 20       # richieste iniziali
+scala_tempi = 50        # influenza dei giorni avanti
+scala_prezzi = 90       # sensibilità al prezzo
+sensibilità = 0.1       # pendenza della sigmoide per la conversione
 
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)
@@ -27,12 +29,12 @@ fine_periodo = oggi + timedelta(days=num_giorni)
 st.subheader("Prezzi base per giorno")
 df_prezzi = pd.DataFrame({
     "Data": [oggi + timedelta(days=i) for i in range(num_giorni)],
-    "Prezzo": [100] * num_giorni
+    "Prezzo Base": [100] * num_giorni
 })
 
-# Tabella interattiva nella pagina principale
+# Tabella interattiva prezzi
 df_prezzi_mod = st.data_editor(df_prezzi, num_rows="dynamic")
-prezzi_base = df_prezzi_mod["Prezzo"].tolist()
+prezzi_base = df_prezzi_mod["Prezzo Base"].tolist()
 
 # -------------------------------
 # FUNZIONI
@@ -59,7 +61,6 @@ numero_prenotazione = 0
 for giorno_corrente in range(num_giorni):
     data_prenotazione = oggi + timedelta(days=giorno_corrente)
 
-    # Simula richieste per check-in futuri
     for giorni_avanti in range(1, num_giorni - giorno_corrente):
         data_checkin = data_prenotazione + timedelta(days=giorni_avanti)
         prezzo = prezzi_base[giorni_avanti]  # prezzo del giorno di check-in
@@ -70,10 +71,8 @@ for giorno_corrente in range(num_giorni):
             disponibilità_camere[data_checkin]
         )
 
-        # Aggiorna disponibilità camere
         disponibilità_camere[data_checkin] -= prenotazioni_effettive
 
-        # Salva le prenotazioni
         for _ in range(prenotazioni_effettive):
             data.append({
                 'DATA PRENOTAZIONE': data_prenotazione,
@@ -81,7 +80,8 @@ for giorno_corrente in range(num_giorni):
                 'CHECK IN': data_checkin,
                 'CHECK OUT (mattina)': data_checkin + timedelta(days=1),
                 'DURATA SOGGIORNO (notti)': 1,
-                'PREZZO': prezzo,
+                'PREZZO BASE': prezzo,
+                'PREZZO MODIFICABILE': prezzo,  # nuova colonna modificabile
                 'CAMERE TOTALI': num_camere,
                 'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
             })
@@ -96,11 +96,15 @@ df_prenotazioni = pd.DataFrame(data)
 # VISUALIZZAZIONE STREAMLIT
 # -------------------------------
 st.subheader("📅 Prenotazioni Generate")
-st.dataframe(df_prenotazioni)
+# Tabella interattiva con possibilità di modificare i prezzi
+df_prenotazioni_mod = st.data_editor(df_prenotazioni, column_config={
+    "PREZZO MODIFICABILE": st.column_config.NumberColumn("Prezzo", step=1)
+})
 
+# Numero prenotazioni giornaliere
 st.subheader("🏨 Camere Occupate per Giorno (effettive)")
 camere_occupate_per_giorno = {}
-for _, row in df_prenotazioni.iterrows():
+for _, row in df_prenotazioni_mod.iterrows():
     giorni_soggiorno = pd.date_range(start=row['CHECK IN'], end=row['CHECK OUT (mattina)'] - timedelta(days=1))
     for g in giorni_soggiorno:
         camere_occupate_per_giorno[g.date()] = camere_occupate_per_giorno.get(g.date(), 0) + 1
@@ -112,8 +116,8 @@ st.bar_chart(df_camere_occupate)
 # -------------------------------
 # DOWNLOAD CSV
 # -------------------------------
-if not df_prenotazioni.empty:
-    csv = df_prenotazioni.to_csv(index=False).encode('utf-8')
+if not df_prenotazioni_mod.empty:
+    csv = df_prenotazioni_mod.to_csv(index=False).encode('utf-8')
     st.download_button(
         label="💾 Scarica CSV delle prenotazioni",
         data=csv,
