@@ -23,18 +23,8 @@ sensibilità = 0.1       # pendenza della sigmoide per la conversione
 oggi = datetime.now().date()
 fine_periodo = oggi + timedelta(days=num_giorni)
 
-# -------------------------------
-# PREZZI BASE PER GIORNO (modificabili)
-# -------------------------------
-st.subheader("Prezzi base per giorno")
-df_prezzi = pd.DataFrame({
-    "Data": [oggi + timedelta(days=i) for i in range(num_giorni)],
-    "Prezzo Base": [100] * num_giorni
-})
-
-# Tabella interattiva prezzi
-df_prezzi_mod = st.data_editor(df_prezzi, num_rows="dynamic")
-prezzi_base = df_prezzi_mod["Prezzo Base"].tolist()
+# Prezzi base per giorno: tutti inizialmente 100€
+prezzi_base = [100] * num_giorni
 
 # -------------------------------
 # FUNZIONI
@@ -78,11 +68,7 @@ for giorno_corrente in range(num_giorni):
                 'DATA PRENOTAZIONE': data_prenotazione,
                 'NUMERO PRENOTAZIONE': numero_prenotazione,
                 'CHECK IN': data_checkin,
-                'CHECK OUT (mattina)': data_checkin + timedelta(days=1),
-                'DURATA SOGGIORNO (notti)': 1,
-                'PREZZO BASE': prezzo,
-                'PREZZO MODIFICABILE': prezzo,  # nuova colonna modificabile
-                'CAMERE TOTALI': num_camere,
+                'PREZZO MODIFICABILE': prezzo,  # colonna modificabile
                 'CAMERE OCCUPATE QUEL GIORNO': num_camere - disponibilità_camere[data_checkin]
             })
             numero_prenotazione += 1
@@ -105,9 +91,8 @@ df_prenotazioni_mod = st.data_editor(df_prenotazioni, column_config={
 st.subheader("🏨 Camere Occupate per Giorno (effettive)")
 camere_occupate_per_giorno = {}
 for _, row in df_prenotazioni_mod.iterrows():
-    giorni_soggiorno = pd.date_range(start=row['CHECK IN'], end=row['CHECK OUT (mattina)'] - timedelta(days=1))
-    for g in giorni_soggiorno:
-        camere_occupate_per_giorno[g.date()] = camere_occupate_per_giorno.get(g.date(), 0) + 1
+    g = row['CHECK IN']
+    camere_occupate_per_giorno[g] = camere_occupate_per_giorno.get(g, 0) + 1
 
 df_camere_occupate = pd.DataFrame(list(camere_occupate_per_giorno.items()), columns=["Data", "Camere Occupate"])
 df_camere_occupate = df_camere_occupate.sort_values("Data").set_index("Data")
