@@ -31,7 +31,7 @@ df_tabella = pd.DataFrame({
 })
 
 # -------------------------------
-# Funzione per calcolare prenotazioni effettive
+# Funzione per aggiornare conversion rate e prenotazioni
 # -------------------------------
 def aggiorna_prenotazioni(df):
     disponibilità_camere = {oggi + timedelta(days=i): num_camere for i in range(num_giorni)}
@@ -40,23 +40,25 @@ def aggiorna_prenotazioni(df):
         check_in = oggi + timedelta(days=row["Giorni avanti"])
         prezzo = row["Prezzo"]
         richieste = row["Richieste"]
-        conv_rate = 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
-        prenotazioni_previste = int(richieste * conv_rate)
 
-        # Limita alle camere disponibili
+        # Conversion rate sigmoide inversa del prezzo
+        conv_rate = 1 / (1 + math.exp(sensibilità * (prezzo - scala_prezzi)))
+
+        # Prenotazioni effettive limitate dalle camere disponibili
+        prenotazioni_previste = int(richieste * conv_rate)
         prenotazioni_effettive = min(prenotazioni_previste, disponibilità_camere[check_in])
         disponibilità_camere[check_in] -= prenotazioni_effettive
 
         df.at[i, "Conversion rate"] = round(conv_rate, 4)
         df.at[i, "Prenotazioni"] = prenotazioni_effettive
         df.at[i, "Camere occupate"] = num_camere - disponibilità_camere[check_in]
+
     return df
 
 # -------------------------------
 # Tabella interattiva
 # -------------------------------
 st.subheader("📊 Prenotazioni giornaliere (modifica Prezzo per aggiornare)")
-
 df_editor = st.data_editor(
     df_tabella,
     column_config={
