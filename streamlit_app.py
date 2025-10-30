@@ -66,19 +66,20 @@ for data_prenotazione in giorni_prenotazioni:
         if camere_rimanenti == 0:
             continue
 
-        # decrementa camere per ogni giorno del soggiorno
-        for giorno in giorni_soggiorno:
-            disponibilità_camere[data_checkin] -= 1
-
-
-
-        # Calcolo camere occupate
+         # Calcolo camere occupate
         camere_occupate_oggi = num_camere - disponibilità_camere[data_checkin]
         centro = num_camere / 2 
 
         # Prezzo dinamico basato su tanh
         # tanh(x) varia da -1 a +1, quindi la normalizziamo in [0,1]
         prezzo_finale = min_price + (max_price - min_price) * 0.5 * (1 + math.tanh(alpha * (camere_occupate_oggi - centro) / beta))
+        
+
+        # decrementa camere per ogni giorno del soggiorno
+        for giorno in giorni_soggiorno:
+            disponibilità_camere[data_checkin] -= 1
+
+
 
         
         # Salva prenotazione
