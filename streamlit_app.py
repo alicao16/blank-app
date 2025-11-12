@@ -9,7 +9,7 @@ import altair as alt
 # -------------------------------
 st.title("🏨 Simulatore Prenotazioni Hotel")
 
-num_camere = st.sidebar.number_input("Numero totale camere", 10, 200, 30)
+num_camere = st.sidebar.number_input("Numero totale camere", 15, 200, 30)
 num_giorni = st.sidebar.number_input("Periodo simulato (giorni futuri)", 10, 365, 60)
 
 richiesto_N0 = st.sidebar.number_input("Richieste iniziali", 1, 100, 20)
